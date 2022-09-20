@@ -7,18 +7,25 @@ defmodule Ticketed.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Start the Ecto repository
-      Ticketed.Repo,
-      # Start the Telemetry supervisor
-      TicketedWeb.Telemetry,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: Ticketed.PubSub},
-      # Start the Endpoint (http/https)
-      TicketedWeb.Endpoint
-      # Start a worker by calling: Ticketed.Worker.start_link(arg)
-      # {Ticketed.Worker, arg}
-    ]
+    children =
+      [
+        # Start the Ecto repository
+        Ticketed.Repo,
+        # Start the Telemetry supervisor
+        TicketedWeb.Telemetry,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: Ticketed.PubSub},
+        # Start the Endpoint (http/https)
+        TicketedWeb.Endpoint
+      ] ++
+        if Mix.env() != :test do
+          [
+            # Start Bookings ingestion
+            Ticketed.BookingsPipeline
+          ]
+        else
+          []
+        end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

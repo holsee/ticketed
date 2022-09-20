@@ -22,7 +22,6 @@ defmodule Ticketed.DataCase do
 
       import Ecto
       import Ecto.Changeset
-      import Ecto.Query
       import Ticketed.DataCase
     end
   end
