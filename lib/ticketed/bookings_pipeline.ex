@@ -66,7 +66,7 @@ defmodule Ticketed.BookingsPipeline do
     if Ticketed.tickets_available?(event) do
       {:ok, _ticket} = Ticketed.create_ticket(user, event)
       Ticketed.send_confirmation_email(user, event)
-      IO.inspect(message, label: "Message")
+      # IO.inspect(message, label: "Message")
     else
       Broadway.Message.failed(message, "sold-out")
     end
@@ -74,7 +74,7 @@ defmodule Ticketed.BookingsPipeline do
 
   @impl Broadway
   def handle_failed(messages, _context) do
-    IO.inspect(messages, label: "Failed messages")
+    # IO.inspect(messages, label: "Failed messages")
 
     Enum.map(messages, fn
       %{status: {:failed, "sold-out"}} = message ->

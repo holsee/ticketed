@@ -11,6 +11,7 @@ For the accompanying book from which this demo was inspired see:
 
 ### Configure RabbitMQ
 
+Create a `config/dev.env` file with the following completed:
 ```bash
 export TICKETED_MQ_HOST="somerandomstring.mq.us-east-1.amazonaws.com"
 export TICKETED_MQ_PORT=5671
@@ -30,9 +31,19 @@ change `amqps://` to `amqp://`.
 
 ### Setup & Run App
 
-Grab deps, compile and run.
+Grab deps
 ``` sh
 $ mix do deps.get, compile
+$ source config/dev.env
+```
+
+Run tests
+```sh
+$ mix test
+```
+
+Run app
+``` sh
 $ mix ecto.reset
 $ iex -S mix phx.server
 ```
@@ -42,7 +53,27 @@ Fire a bunch of messages onto your RabbitMQ 🐰
 iex> send_messages.(10)
 ```
 
+## Dashboards
+
+### Phoenix Dashboard
+
+```sh
+open http://localhost:4000/dev/dashboard
+```
+
+Ecto & PSQL Dashboard:
+```sh
+$ open http://localhost:4000/dev/dashboard/ecto_stats
+```
+
+Broadway Processing Pipeline Dashboard:
+```sh
+$ open http://localhost:4000/dev/dashboard/broadway?nav=BookingsPipeline
+```
+
+### Email Mailbox (dev)
+
 View Emails using Swoosh test Mailbox:
 ```bash
-open http://localhost:4000/dev/mailbox
+$ open http://localhost:4000/dev/mailbox
 ```
