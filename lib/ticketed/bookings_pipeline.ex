@@ -67,6 +67,7 @@ defmodule Ticketed.BookingsPipeline do
       {:ok, _ticket} = Ticketed.create_ticket(user, event)
       Ticketed.send_confirmation_email(user, event)
       # IO.inspect(message, label: "Message")
+      message
     else
       Broadway.Message.failed(message, "sold-out")
     end

@@ -12,7 +12,7 @@
 
 # Create stream to generate unique emails
 users =
-  Faker.Util.sample_uniq(20, fn -> Faker.Internet.email() end)
+  Faker.Util.sample_uniq(300, fn -> Faker.Internet.email() end)
   |> Enum.map(fn email ->
     %{
       name: Faker.StarWars.character(),
@@ -27,7 +27,7 @@ Ticketed.Repo.insert_all(
 
 Ticketed.Repo.insert_all(
   Ticketed.Events.Event,
-  Enum.map(1..20, fn _ ->
+  Enum.map(1..2000, fn _ ->
     %{
       name: Faker.Cannabis.strain() <> " Fest",
       when: Faker.DateTime.forward(7),
