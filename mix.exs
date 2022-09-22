@@ -52,7 +52,8 @@ defmodule Ticketed.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:broadway, "~> 1.0"},
       {:broadway_rabbitmq, "~> 0.7"},
-      {:lager, "~> 3.9"}
+      {:lager, "~> 3.9"},
+      {:amqp, "~> 3.1"}
     ]
   end
 
