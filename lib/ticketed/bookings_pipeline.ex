@@ -24,10 +24,20 @@ defmodule Ticketed.BookingsPipeline do
       producer: [module: {@producer, producer_config}],
       processors: [
         default: []
+      ],
+      batchers: [
+        default: []
       ]
     ]
 
     Broadway.start_link(__MODULE__, options)
+  end
+
+  @impl Broadway
+  def handle_batch(_batcher, messages, batch_info, _context) do
+    IO.inspect(batch_info, label: "#{inspect(self())} Batch")
+
+    messages
   end
 
   @impl Broadway

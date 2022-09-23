@@ -64,4 +64,21 @@ defmodule Ticketed.TicketedTest do
       assert_email_sent(expected_email)
     end
   end
+
+  describe "insert_all_tickets" do
+    test "should insert all tickets" do
+      ticket_attrs = Enum.map(0..3, fn _ -> Ticketed.TicketsFixtures.valid_attrs() end)
+      assert {:ok, [%Ticket{} | _] = tickets} = Ticketed.insert_all_tickets(ticket_attrs)
+      assert length(ticket_attrs) == length(tickets)
+    end
+
+    test "should return error changeset when a single item in the batch is invalid" do
+      ticket_attrs = [
+        Ticketed.TicketsFixtures.valid_attrs(),
+        Ticketed.TicketsFixtures.valid_attrs() |> Map.delete(:event_id)
+      ]
+
+      assert {:error, %Ecto.Changeset{}} = Ticketed.insert_all_tickets(ticket_attrs)
+    end
+  end
 end

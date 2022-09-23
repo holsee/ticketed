@@ -11,7 +11,7 @@ defmodule Ticketed.Tickets.Ticket do
   end
 
   @doc false
-  def changeset(ticket, attrs) do
+  def changeset(ticket \\ %__MODULE__{}, attrs) do
     ticket
     |> cast(attrs, [:user_id, :event_id])
     |> validate_required([:user_id, :event_id])

@@ -66,9 +66,32 @@ defmodule Ticketed do
     |> Map.new()
   end
 
-  # def insert_all_tickets(messages) do
-  #   # Normally `Repo.insert_all/3` if using `Ecto`...
-  #   Process.sleep(Enum.count(messages) * 250)
-  #   messages
-  # end
+  @doc """
+  Inserts batch of tickets and returns them, if any fail the changeset 
+  for the first failed item is returned.
+  """
+  @spec(
+    insert_all_tickets(ticket_attrs :: list(map())) :: {:ok, list(%Ticket{})},
+    {:error, Ecto.Changeset.t()}
+  )
+  def insert_all_tickets(tickets_attrs) do
+    tickets_attrs
+    |> Enum.with_index()
+    |> List.foldl(Ecto.Multi.new(), fn
+      {attrs, idx}, multi ->
+        Ecto.Multi.insert(
+          multi,
+          {:ticket, idx},
+          Ticketed.Tickets.Ticket.changeset(attrs)
+        )
+    end)
+    |> Ticketed.Repo.transaction()
+    |> case do
+      {:ok, inserted_tickets} ->
+        {:ok, Map.values(inserted_tickets)}
+
+      {:error, _name, changeset, _} ->
+        {:error, changeset}
+    end
+  end
 end
