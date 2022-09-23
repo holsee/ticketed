@@ -16,7 +16,10 @@ defmodule Ticketed.BookingsPipeline do
         ]
       ],
       declare: [durable: true],
-      on_failure: :reject_and_requeue
+      on_failure: :reject_and_requeue,
+      qos: [
+        prefetch_count: 10_000
+      ]
     ]
 
     options = [
@@ -26,7 +29,10 @@ defmodule Ticketed.BookingsPipeline do
         default: []
       ],
       batchers: [
-        default: []
+        default: [
+          concurrency: 10,
+          batch_size: 1000
+        ]
       ]
     ]
 
@@ -35,7 +41,19 @@ defmodule Ticketed.BookingsPipeline do
 
   @impl Broadway
   def handle_batch(_batcher, messages, batch_info, _context) do
-    IO.inspect(batch_info, label: "#{inspect(self())} Batch")
+    IO.puts(
+      "#{inspect(self())} Batch #{batch_info.size} #{batch_info.batcher} #{batch_info.batch_key}"
+    )
+
+    {:ok, _tickets} =
+      messages
+      |> Enum.map(& &1.data)
+      |> Ticketed.insert_all_tickets()
+
+    messages
+    |> Enum.map(fn %_{data: %{event: event, user: user}} ->
+      Ticketed.send_confirmation_email(user, event)
+    end)
 
     messages
   end
@@ -61,22 +79,19 @@ defmodule Ticketed.BookingsPipeline do
     # Put users and events into message
     Enum.map(messages, fn message ->
       Broadway.Message.update_data(message, fn data ->
-        %{
+        Map.merge(data, %{
           event: Map.get(events, data.event_id),
           user: Map.get(users, data.user_id)
-        }
+        })
       end)
     end)
   end
 
   @impl Broadway
   def handle_message(_processor, message, _context) do
-    %_{data: %{event: event, user: user}} = message
+    %_{data: %{event: event}} = message
 
     if Ticketed.tickets_available?(event) do
-      {:ok, _ticket} = Ticketed.create_ticket(user, event)
-      Ticketed.send_confirmation_email(user, event)
-      # IO.inspect(message, label: "Message")
       message
     else
       Broadway.Message.failed(message, "sold-out")
